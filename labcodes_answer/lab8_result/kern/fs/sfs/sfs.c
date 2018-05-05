@@ -3,6 +3,12 @@
 #include <error.h>
 #include <assert.h>
 
+// Define useless symbols to prevent link error
+void __udivdi3() {}
+void __udivti3() {}
+void __floatundisf() {}
+void __floatundidf() {}
+
 // From Rust
 extern int sfs_do_mount(struct device *dev, struct fs **fs_store);
 

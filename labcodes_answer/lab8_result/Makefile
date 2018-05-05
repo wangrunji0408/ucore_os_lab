@@ -54,8 +54,7 @@ CTYPE	:= c S
 
 LD      := $(GCCPREFIX)ld
 LDFLAGS	:= -m $(shell $(LD) -V | grep elf_i386 2>/dev/null)
-LDFLAGS	+= -nostdlib --gc-sections
-# --gc-sections: Fix Rust link error such as undefined symbol '__floatundisf' ...
+LDFLAGS	+= -nostdlib
 
 OBJCOPY := $(GCCPREFIX)objcopy
 OBJDUMP := $(GCCPREFIX)objdump
