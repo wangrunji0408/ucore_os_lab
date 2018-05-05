@@ -3,6 +3,14 @@
 #include <error.h>
 #include <assert.h>
 
+// From Rust
+extern int sfs_do_mount(struct device *dev, struct fs **fs_store);
+
+int
+sfs_mount(const char *devname) {
+    return vfs_mount(devname, sfs_do_mount);
+}
+
 /*
  * sfs_init - mount sfs on disk0
  *

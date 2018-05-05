@@ -54,7 +54,8 @@ CTYPE	:= c S
 
 LD      := $(GCCPREFIX)ld
 LDFLAGS	:= -m $(shell $(LD) -V | grep elf_i386 2>/dev/null)
-LDFLAGS	+= -nostdlib
+LDFLAGS	+= -nostdlib --gc-sections
+# --gc-sections: Fix Rust link error such as undefined symbol '__floatundisf' ...
 
 OBJCOPY := $(GCCPREFIX)objcopy
 OBJDUMP := $(GCCPREFIX)objdump
@@ -182,7 +183,9 @@ KCFLAGS		+= $(addprefix -I,$(KINCLUDE))
 
 $(call add_files_cc,$(call listf_cc,$(KSRCDIR)),kernel,$(KCFLAGS))
 
-KOBJS	= $(call read_packet,kernel libs)
+RUST_FS_OBJ_PATH = /Users/wangrunji/Documents/Codes/Tsinghua/Grade3-2/OS/simple-filesystem/target/ucore/debug/libsimple_filesystem.a
+
+KOBJS	= $(call read_packet,kernel libs) $(RUST_FS_OBJ_PATH)
 
 # create kernel target
 kernel = $(call totarget,kernel)
@@ -241,8 +244,14 @@ $(call create_target,ucore.img)
 # create swap.img
 SWAPIMG		:= $(call totarget,swap.img)
 
+ifeq ($(shell uname), Linux)
+	M := M
+else
+	M := m
+endif
+
 $(SWAPIMG):
-	$(V)dd if=/dev/zero of=$@ bs=1M count=128
+	$(V)dd if=/dev/zero of=$@ bs=1$(M) count=128
 
 $(call create_target,swap.img)
 
@@ -265,7 +274,7 @@ $(SFSROOT):
 	$(V)$(MKDIR) $@
 
 $(SFSIMG): $(SFSROOT) $(SFSBINS) | $(call totarget,mksfs)
-	$(V)dd if=/dev/zero of=$@ bs=1M count=128
+	$(V)dd if=/dev/zero of=$@ bs=1$(M) count=128
 	@$(call totarget,mksfs) $@ $(SFSROOT)
 
 $(call create_target,sfs.img)
