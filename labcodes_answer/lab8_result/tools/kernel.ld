@@ -44,6 +44,11 @@ SECTIONS {
         *(.data .data.*)
     }
 
+    /* The got segment */
+    .got : {
+        *(.got .got.*)
+    }
+
     PROVIDE(edata = .);
 
     .bss : {
