@@ -38,12 +38,20 @@ create_inode_for_sfs(const struct inode_ops* ops, struct fs* fs) {
     return inode;
 }
 
+struct fs*
+inode_get_fs(const struct inode* inode) {
+	assert(inode != NULL);
+	return inode->in_fs;
+}
+
 // From Rust
 extern int
 sfs_do_mount(struct device *dev, struct fs **fs_store);
 
 int
 sfs_mount(const char *devname) {
+	cprintf("sfs_dentry_size = %d\n", sfs_dentry_size);
+	cprintf("sizeof(inode_ops) = %d\n", sizeof(struct inode_ops));
     return vfs_mount(devname, sfs_do_mount);
 }
 
