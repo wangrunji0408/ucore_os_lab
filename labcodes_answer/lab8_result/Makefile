@@ -182,9 +182,13 @@ KCFLAGS		+= $(addprefix -I,$(KINCLUDE))
 
 $(call add_files_cc,$(call listf_cc,$(KSRCDIR)),kernel,$(KCFLAGS))
 
-RUST_FS_OBJ_PATH = /Users/wangrunji/Documents/Codes/Tsinghua/Grade3-2/OS/simple-filesystem/target/ucore/debug/libsimple_filesystem.a
+RUST_FS_OBJ = ./rust_sfs/target/ucore/debug/libsimple_filesystem.a
 
-KOBJS	= $(call read_packet,kernel libs) $(RUST_FS_OBJ_PATH)
+$(RUST_FS_OBJ):
+	@echo + make rust_sfs
+	@cd rust_sfs && make ucore && cd ..
+
+KOBJS	= $(call read_packet,kernel libs) $(RUST_FS_OBJ)
 
 # create kernel target
 kernel = $(call totarget,kernel)
@@ -326,9 +330,8 @@ dbg4ec: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 
 debug: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 	$(V)$(QEMU) -S -s -parallel stdio $(QEMUOPTS) -serial null &
-#	TODO: Uncomment this
-#	$(V)sleep 2
-#	$(V)$(TERMINAL) -e "$(GDB) -q -x tools/gdbinit"
+	$(V)sleep 2
+	$(V)$(TERMINAL) -e "$(GDB) -q -x tools/gdbinit"
 
 debug-nox: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 	$(V)$(QEMU) -S -s -serial mon:stdio $(QEMUOPTS) -nographic &
