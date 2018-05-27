@@ -182,11 +182,11 @@ KCFLAGS		+= $(addprefix -I,$(KINCLUDE))
 
 $(call add_files_cc,$(call listf_cc,$(KSRCDIR)),kernel,$(KCFLAGS))
 
-RUST_FS_OBJ = ./rust_sfs/target/ucore/debug/libsimple_filesystem.a
+RUST_FS_OBJ = ./rust_sfs/sfs-c/target/ucore/release/libsfs_c.a
 
 $(RUST_FS_OBJ):
 	@echo + make rust_sfs
-	@cd rust_sfs && make ucore && cd ..
+	@cd rust_sfs/sfs-c && make ucore && cd ../..
 
 KOBJS	= $(call read_packet,kernel libs) $(RUST_FS_OBJ)
 
