@@ -9,16 +9,6 @@
 static lock_t fork_lock = INIT_LOCK;
 
 void
-lock_fork(void) {
-    lock(&fork_lock);
-}
-
-void
-unlock_fork(void) {
-    unlock(&fork_lock);
-}
-
-void
 exit(int error_code) {
     sys_exit(error_code);
     cprintf("BUG: exit failed.\n");

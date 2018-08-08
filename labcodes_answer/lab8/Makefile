@@ -30,7 +30,7 @@ HOSTCFLAGS	:= -Wall -O2
 GDB		:= $(GCCPREFIX)gdb
 
 CC		:= $(GCCPREFIX)gcc
-CFLAGS  := -mcmodel=medany -O2 -std=gnu99 -Wno-unused
+CFLAGS  := -mcmodel=medany -O2 -std=gnu99 -Wno-unused -march=rv32i -mabi=ilp32
 CFLAGS	+= -fno-builtin -Wall -nostdinc $(DEFS)
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CTYPE	:= c S
@@ -119,7 +119,7 @@ USER_BINS += $$(__user_bin__)
 $$(__user_bin__): tools/user.ld
 $$(__user_bin__): $$(UOBJS)
 $$(__user_bin__): $(1) | $$$$(dir $$$$@)
-	$(V)$(LD) $(LDFLAGS) -T tools/user.ld -o $$@ $$(UOBJS) $(1)
+	$(V)$(LD) $(LDFLAGS) -T tools/user.ld -o $$@ $$(UOBJS) $(1) libgcc.a
 	@$(OBJDUMP) -S $$@ > $$(call cgtype,$$<,o,asm)
 	@$(OBJDUMP) -t $$@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$$$/d' > $$(call cgtype,$$<,o,sym)
 endef
@@ -235,7 +235,7 @@ $(kernel): tools/kernel.ld
 
 $(kernel): $(KOBJS) $(SWAPIMG) $(SFSIMG)
 	@echo + ld $@
-	$(V)$(LD) $(LDFLAGS) -T tools/kernel.ld -o $@ $(KOBJS) --format=binary $(SWAPIMG) $(SFSIMG) --format=default
+	$(V)$(LD) $(LDFLAGS) -T tools/kernel.ld -o $@ $(KOBJS) libgcc.a --format=binary $(SWAPIMG) $(SFSIMG) --format=default
 	@$(OBJDUMP) -S $@ > $(call asmfile,kernel)
 	@$(OBJDUMP) -t $@ | $(SED) '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $(call symfile,kernel)
 
@@ -246,7 +246,9 @@ $(call create_target,kernel)
 UCOREIMG	:= $(call totarget,ucore.img)
 
 $(UCOREIMG): $(kernel)
-	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --prefix=$(RISCV) --host=riscv32-unknown-elf --with-payload=../../labcodes_answer/$(PROJ)/$(kernel) --disable-fp-emulation --enable-logo && make && cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
+	cp $(kernel) $(UCOREIMG)
+	$(OBJCOPY) -O binary $(kernel) bin/ucore.bin
+	# cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --prefix=$(RISCV) --host=riscv32-unknown-elf --with-payload=../../labcodes_answer/$(PROJ)/$(kernel) --disable-fp-emulation --enable-logo && make && cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
 
 $(call create_target,ucore.img)
 

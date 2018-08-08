@@ -43,23 +43,26 @@
 #define SBI_CALL_1(which, arg0) SBI_CALL(which, arg0, 0, 0)
 #define SBI_CALL_2(which, arg0, arg1) SBI_CALL(which, arg0, arg1, 0)
 
+#define SERIAL_DATA ((volatile unsigned char*)0x10000000)
+#define SERIAL_STATUS ((volatile unsigned char*)0x10000005)
+#define SERIAL_READ 1
+#define SERIAL_WRITE (1 << 5)
+
 static inline void sbi_console_putchar(int ch)
 {
-	SBI_CALL_1(SBI_CONSOLE_PUTCHAR, ch);
+	while(!((*SERIAL_STATUS) & SERIAL_WRITE));
+	*SERIAL_DATA = ch;
 }
 
 static inline int sbi_console_getchar(void)
 {
-	return SBI_CALL_0(SBI_CONSOLE_GETCHAR);
+	while(!((*SERIAL_STATUS) & SERIAL_READ));
+	return *SERIAL_DATA;
 }
 
-static inline void sbi_set_timer(uint64_t stime_value)
+static inline void sbi_set_timer(uint64_t x)
 {
-#if __riscv_xlen == 32
-	SBI_CALL_2(SBI_SET_TIMER, stime_value, stime_value >> 32);
-#else
-	SBI_CALL_1(SBI_SET_TIMER, stime_value);
-#endif
+	asm volatile("csrw 0x321, %0; csrw 0x322, %1" :: "r"((unsigned)x), "r"((unsigned)(x >> 32)));
 }
 
 static inline void sbi_shutdown(void)
