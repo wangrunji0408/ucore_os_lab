@@ -226,6 +226,8 @@ void pmm_init(void) {
     // boot_map_segment(boot_pgdir, KERNBASE, KMEMSIZE, 0, PTE_W);
     boot_map_segment(boot_pgdir, KERNBASE, KMEMSIZE, PADDR(KERNBASE),
                      READ_WRITE_EXEC);
+    // map serial port
+    boot_map_segment(boot_pgdir, 0x10000000, 0x1000, 0x10000000, READ_WRITE);
 
     enable_paging();
 

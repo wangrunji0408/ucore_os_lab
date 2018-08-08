@@ -46,7 +46,7 @@
 
 /* All physical memory mapped at this address */
 #define KERNBASE            0x80000000
-#define KMEMSIZE            0x08000000                  // the maximum amount of physical memory
+#define KMEMSIZE            0x00800000                  // the maximum amount of physical memory
 #define KERNTOP             (KERNBASE + KMEMSIZE)
 
 /* *

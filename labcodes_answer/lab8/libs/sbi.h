@@ -56,7 +56,9 @@ static inline void sbi_console_putchar(int ch)
 
 static inline int sbi_console_getchar(void)
 {
-	while(!((*SERIAL_STATUS) & SERIAL_READ));
+	if(!((*SERIAL_STATUS) & SERIAL_READ)) {
+		return -1;
+	}
 	return *SERIAL_DATA;
 }
 
