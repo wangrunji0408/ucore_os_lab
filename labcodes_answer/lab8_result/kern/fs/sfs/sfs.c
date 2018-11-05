@@ -5,12 +5,6 @@
 #include <vfs.h>
 #include <inode.h>
 
-// Define useless symbols to prevent link error
-void __udivdi3() {}
-void __udivti3() {}
-void __floatundisf() {}
-void __floatundidf() {}
-
 struct fs_ops {
     int (*fs_sync)(struct fs *fs);                 // Flush all dirty buffers to disk
     struct inode *(*fs_get_root)(struct fs *fs);   // Return root inode of filesystem.
