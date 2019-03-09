@@ -22,7 +22,7 @@ static void print_ticks() {
     cprintf("%d ticks\n",TICK_NUM);
 #ifdef DEBUG_GRADE
     cprintf("End of Test.\n");
-    panic("EOT: kernel seems ok.");
+    outb(0x501, 0);
 #endif
 }
 

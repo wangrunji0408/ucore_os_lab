@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <x86.h>
 
 #define BUFSIZE 1024
 static char buf[BUFSIZE];
@@ -23,6 +24,10 @@ static char buf[BUFSIZE];
  * */
 char *
 readline(const char *prompt) {
+    #ifdef DEBUG_GRADE
+        cprintf("End of Test.\n");
+        outb(0x501, 0);
+    #endif
     if (prompt != NULL) {
         cprintf("%s", prompt);
     }

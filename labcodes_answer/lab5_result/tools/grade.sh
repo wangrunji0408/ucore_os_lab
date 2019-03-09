@@ -11,11 +11,7 @@ else
 fi
 
 ## make & makeopts
-if gmake --version > /dev/null 2>&1; then
-    make=gmake;
-else
-    make=make;
-fi
+make=make
 
 makeopts="--quiet --no-print-directory -j"
 
@@ -136,8 +132,8 @@ run_qemu() {
     t0=$(get_time)
     (
         ulimit -t $timeout
-        exec $qemu -nographic $qemuopts -serial file:$qemu_out -monitor null -no-reboot $qemuextra
-    ) > $out 2> $err &
+        exec $qemu -nographic $qemuopts -serial file:$qemu_out -monitor null -no-reboot $qemuextra -device isa-debug-exit
+    ) > $out 2> $err
     pid=$!
 
     # wait for QEMU to start
@@ -254,7 +250,7 @@ run_test() {
         select=
         case $1 in
             -tag|-prog)
-                select=`expr substr $1 2 ${#1}`
+                select=${1:1:5}
                 eval $select='$2'
                 ;;
         esac
@@ -321,7 +317,7 @@ swapimg=$(make_print swapimg)
 qemuopts="-hda $osimg -drive file=$swapimg,media=disk,cache=writeback"
 
 ## set break-function, default is readline
-brkfun=readline
+# brkfun=readline
 
 default_check() {
     pts=7
