@@ -64,7 +64,12 @@ static inline int sbi_console_getchar(void)
 
 static inline void sbi_set_timer(uint64_t x)
 {
-	asm volatile("csrw 0x321, %0; csrw 0x322, %1" :: "r"((unsigned)x), "r"((unsigned)(x >> 32)));
+	// core local interruptor (CLINT), which contains the timer.
+	const uintptr_t CLINT = 0x2000000L;
+	const uintptr_t CLINT_MTIMECMP = CLINT + 0x4000;
+	const uintptr_t CLINT_MTIME = CLINT + 0xBFF8; // cycles since boot.
+	
+	*(uint64_t*)CLINT_MTIMECMP = x;
 }
 
 static inline void sbi_shutdown(void)

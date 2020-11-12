@@ -6,7 +6,7 @@ SLASH	:= /
 V       := @
 
 ifndef GCCPREFIX
-GCCPREFIX := riscv32-unknown-elf-
+GCCPREFIX := riscv64-unknown-elf-
 endif
 
 ifndef QEMU
@@ -159,7 +159,7 @@ $(call create_target_host,mksfs,mksfs)
 SWAPIMG		:= $(call totarget,swap.img)
 
 $(SWAPIMG):
-	$(V)dd if=/dev/zero of=$@ bs=4kB count=8
+	$(V)dd if=/dev/zero of=$@ bs=4k count=8
 
 $(call create_target,swap.img)
 
@@ -182,7 +182,7 @@ $(SFSROOT):
 	$(V)$(MKDIR) $@
 
 $(SFSIMG): $(SFSROOT) $(SFSBINS) | $(call totarget,mksfs)
-	$(V)dd if=/dev/zero of=$@ bs=1kB count=480
+	$(V)dd if=/dev/zero of=$@ bs=1k count=480
 	@$(call totarget,mksfs) $@ $(SFSROOT)
 
 $(call create_target,sfs.img)
@@ -235,7 +235,7 @@ $(kernel): tools/kernel.ld
 
 $(kernel): $(KOBJS) $(SWAPIMG) $(SFSIMG)
 	@echo + ld $@
-	$(V)$(LD) $(LDFLAGS) -T tools/kernel.ld -o $@ $(KOBJS) libgcc.a --format=binary $(SWAPIMG) $(SFSIMG) --format=default
+	$(V)$(LD) $(LDFLAGS) -T tools/kernel.ld -o $@ $(KOBJS) libgcc.a --format=binary $(SWAPIMG) $(SFSIMG) --format=elf32-littleriscv
 	@$(OBJDUMP) -S $@ > $(call asmfile,kernel)
 	@$(OBJDUMP) -t $@ | $(SED) '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $(call symfile,kernel)
 
@@ -248,7 +248,6 @@ UCOREIMG	:= $(call totarget,ucore.img)
 $(UCOREIMG): $(kernel)
 	cp $(kernel) $(UCOREIMG)
 	$(OBJCOPY) -O binary $(kernel) bin/ucore.bin
-	# cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --prefix=$(RISCV) --host=riscv32-unknown-elf --with-payload=../../labcodes_answer/$(PROJ)/$(kernel) --disable-fp-emulation --enable-logo && make && cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
 
 $(call create_target,ucore.img)
 
@@ -281,7 +280,7 @@ QEMUOPTS = -hda $(UCOREIMG) -drive file=$(SWAPIMG),media=disk,cache=writeback -d
 
 .PHONY: qemu spike
 qemu: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
-	$(V)$(QEMU) -machine virt -kernel $(UCOREIMG) -nographic
+	$(V)$(QEMU) -machine virt -kernel $(UCOREIMG) -nographic -bios none
 
 spike: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 	$(V)$(SPIKE) $(UCOREIMG)
